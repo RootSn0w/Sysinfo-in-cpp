@@ -32,46 +32,85 @@ int main (int argc, char **argv) {
 	char cpu[56];
 	char resolution[56];
 	auto blue = "\033[0m\033[1;34m";
-	auto white = "\033[0m\033[1;37m";
+	auto white = "\033[0m\033[0m";
 
 	FILE *fp;
-	fp = popen("pacman -Qq | wc -l", "r"); // Packages
-	fgets(packages, 56, fp);
-	packages[strlen(packages) - 1] = '\0';
-	fp = popen("free -m | grep Mem | awk '{print $3}'", "r"); // Used Memory
+	
+	// Memory
+	// Used
+	fp = popen("free -m | grep Mem | awk '{print $3}'", "r");
 	fscanf(fp, "%d", &usedMem);
-	fp = popen("free -m | grep Mem | awk '{print $5}'", "r"); // Shared Memory
+	// Shared
+	fp = popen("free -m | grep Mem | awk '{print $5}'", "r");
 	fscanf(fp, "%d", &sharedMem);
-	fp = popen("free -m | grep Mem | awk '{print $2}'", "r"); // Total Memory
+	// Total
+	fp = popen("free -m | grep Mem | awk '{print $2}'", "r");
 	fscanf(fp, "%d", &totalMem);
-	fp = popen("uptime -p | cut -b 4-", "r"); // Uptime
+	
+
+	// Uptime
+	fp = popen("uptime -p | cut -b 4-", "r");
 	fgets(uptime, 56, fp);
 	uptime[strlen(uptime) - 1] = '\0';
-	fp = popen("env | grep DESKTOP_SESSION= | cut -b 17-", "r"); // Desktop Session
+
+
+	// Desktop Session
+	fp = popen("env | grep DESKTOP_SESSION= | cut -b 17-", "r");
 	fgets(desktop, 56, fp);
 	desktop[strlen(desktop) - 1] = '\0';
-	fp = popen("uname -rm", "r"); // Kernel Version
+
+
+	// Kernel Version
+	fp = popen("uname -rm", "r"); 
 	fgets(kernel, 56, fp);
 	kernel[strlen(kernel) - 1] = '\0';
-	fp = popen("cat /etc/os-release | grep PRETTY_NAME | cut -c 14- | rev | cut -c 2- | rev", "r"); // Distro Name
+
+
+	// Distro
+	fp = popen("cat /etc/os-release | grep PRETTY_NAME | cut -c 14- | rev | cut -c 2- | rev", "r");
 	fgets(os, 56, fp);
 	os[strlen(os) - 1] = '\0';
-	fp = popen("echo $USER", "r"); // User
+
+
+	// User
+	fp = popen("echo $USER", "r");
 	fgets(user, 56, fp);
 	user[strlen(user) - 1] = '\0';
-	fp = popen("hostname", "r"); // Hostname
+	
+
+	// Hostname
+	fp = popen("hostname", "r"); 
 	fgets(host, 56, fp);
 	host[strlen(host) - 1] = '\0';
-	fp = popen("cat /proc/cpuinfo | grep \"model name\" | awk 'getline' | awk 'getline' | cut -c 14-", "r"); // CPU
+
+
+	// CPU
+	fp = popen("cat /proc/cpuinfo | grep \"model name\" | awk 'getline' | awk 'getline' | cut -c 14-", "r"); 
 	fgets(cpu, 56, fp);
 	cpu[strlen(cpu) - 1] = '\0';
-	fp = popen("xrandr| grep \" connected\" | awk '{print $3}' | rev | cut -c 5- | rev", "r"); // CPU
+
+
+	// Resolution
+	fp = popen("xrandr| grep \" connected\" | awk '{print $3}' | rev | cut -c 5- | rev", "r");
 	fgets(resolution, 56, fp);
 	resolution[strlen(resolution) - 1] = '\0';
+
+
+	// Packages
+	if (strstr(os, "Arch") != NULL){
+		fp = popen("pacman -Qq | wc -l", "r"); 
+		fgets(packages, 56, fp);
+		packages[strlen(packages) - 1] = '\0';
+	} else if (strstr(os, "Gentoo") != NULL) {
+		fp = popen("ls -d /var/db/pkg/*/* | wc -l", "r");
+		fgets(packages, 56, fp);
+		packages[strlen(packages) - 1] = '\0';
+	} else {
+		strcpy(packages, "Unknow (Only works in Arch and Gentoo)");
+	}
+
 	pclose(fp);
 
-	if (strstr(os,"Arch") == NULL)
-		strcpy(packages, "Unknow (Only works in Arch)");
 
 
 	cout << blue << "\t\t" << user << white << "@" << blue << host << endl;
