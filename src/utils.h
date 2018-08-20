@@ -37,15 +37,13 @@ std::string get_user(){
 
 screeninfo get_screen(){
 
-    Display* pdsp = NULL;
-    Screen* pscr = NULL;
+    Display* pdsp = XOpenDisplay(NULL);
+    Screen* pscr = DefaultScreenOfDisplay(pdsp);
     struct screeninfo buffer;
 
-    pdsp = XOpenDisplay( NULL );
     if ( !pdsp )
         throw ("Failed to open default display.");
 
-    pscr = DefaultScreenOfDisplay( pdsp );
     if ( !pscr )
         throw ("Failed to obtain the default screen of given display.");
 
@@ -54,7 +52,7 @@ screeninfo get_screen(){
     buffer.desktop = std::getenv("XDG_SESSION_DESKTOP");
     buffer.server = std::getenv("XDG_SESSION_TYPE");
 
-    XCloseDisplay( pdsp );
+    XCloseDisplay(pdsp);
     return buffer;
 }
 
