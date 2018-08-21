@@ -3,6 +3,7 @@
 
 #include <sys/sysinfo.h>
 #include <sys/utsname.h>
+#include <sys/stat.h>
 #include <X11/Xlib.h>
 #include <unistd.h>
 #include <string>
@@ -28,18 +29,48 @@ struct screeninfo {
     std::string server;
 };
 
-int get_packages(){
+enum {
+    portage = 1,
+    pacman = 2,
+    dpkg = 3
+};
 
-    std::ifstream file("/var/lib/dpkg/status");
-    std::string line;
-    int count = 0;
+int check_manager(){
+    struct stat buffer;
+    if (stat("/usr/bin/dpkg",   &buffer) == 0) return dpkg;
+    if (stat("/usr/bin/pacman", &buffer) == 0) return pacman;
+    if (stat("/usr/bin/emerge", &buffer) == 0) return portage;
+}
 
-    while(std::getline(file, line)){
-        if (line == "Status: install ok installed") count++;
+int get_packages(int manager){
+
+    switch (manager){
+        case dpkg:{
+            std::ifstream file("/var/lib/dpkg/status");
+            std::string line;
+            int count = 0;
+
+            while(std::getline(file, line)){
+                if (line == "Status: install ok installed") count++;
+            }
+            file.close();
+            return count;
+        }
+        default:
+            return 0;
+            break;
     }
+}
+
+std::string get_distro(){
+
+    std::ifstream file("/etc/os-release");
+    std::string line;
+
+    std::getline(file, line);
 
     file.close();
-    return count;
+    return line.replace(line.size() - 1, line.size(), "").replace(line.begin(), line.begin() + 6, "");
 }
 
 std::string get_shell(){
