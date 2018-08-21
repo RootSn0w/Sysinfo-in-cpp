@@ -7,6 +7,8 @@
 #include <unistd.h>
 #include <string>
 #include <cstdlib>
+#include <regex>
+#include <fstream>
 
 struct uptime {
 	int days;
@@ -27,6 +29,22 @@ struct screeninfo {
     std::string server;
 };
 
+int get_packages(){
+
+    std::regex r("Status: install ok installed");
+    std::smatch m;
+    std::ifstream file("/var/lib/dpkg/status");
+    std::string line;
+    int count = 0;
+
+    while(std::getline(file, line)){
+        if (std::regex_match(line, m, r)) count++;
+    }
+
+    file.close();
+    return count;
+}
+
 std::string get_shell(){
     return std::getenv("SHELL");
 }
@@ -41,10 +59,10 @@ screeninfo get_screen(){
     Screen* pscr = DefaultScreenOfDisplay(pdsp);
     struct screeninfo buffer;
 
-    if ( !pdsp )
+    if (!pdsp)
         throw ("Failed to open default display.");
 
-    if ( !pscr )
+    if (!pscr)
         throw ("Failed to obtain the default screen of given display.");
 
     buffer.width = pscr->width;
@@ -110,22 +128,5 @@ meminfo get_mem(){
 
     return info;
 }
-
-// meminfo get_mem(){
-
-//     struct meminfo buffer;
-
-//     long pageSize = sysconf(_SC_PAGESIZE);
-//     long avPages  = sysconf(_SC_AVPHYS_PAGES);
-//     long totalPages = sysconf(_SC_PHYS_PAGES);
-    
-//     long totalMem = totalPages * pageSize;
-//     long availableMem = avPages * pageSize;
-    
-//     buffer.free  = (totalMem - availableMem)  / 1024 / 1024;
-//     buffer.total = totalMem / 1024 / 1024;
-
-//     return buffer;
-// }
 
 #endif
