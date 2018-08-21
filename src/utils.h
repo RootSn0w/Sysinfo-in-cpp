@@ -7,7 +7,6 @@
 #include <unistd.h>
 #include <string>
 #include <cstdlib>
-#include <regex>
 #include <fstream>
 
 struct uptime {
@@ -31,14 +30,12 @@ struct screeninfo {
 
 int get_packages(){
 
-    std::regex r("Status: install ok installed");
-    std::smatch m;
     std::ifstream file("/var/lib/dpkg/status");
     std::string line;
     int count = 0;
 
     while(std::getline(file, line)){
-        if (std::regex_match(line, m, r)) count++;
+        if (line == "Status: install ok installed") count++;
     }
 
     file.close();
