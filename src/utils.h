@@ -29,7 +29,7 @@ struct screeninfo {
     std::string server;
 };
 
-enum {
+enum manager {
     portage = 1,
     pacman = 2,
     dpkg = 3
